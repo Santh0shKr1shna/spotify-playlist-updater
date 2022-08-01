@@ -3,7 +3,7 @@ I made a python program which scrapes Billboards TOP-100 chart every week and up
 
 ## Working
 
-I built a scrapper which scrapes the data off the given URL (billboards.com/hot-100) and feeds the data to the main program which accesses the spotiy account via 'api.spotify' services and creates and adds tracks to the playlist accordingly
+I built a scrapper which scrapes the data off the given URL (billboards.com/hot-100) and feeds the data to the main program which accesses the spotify account via 'api.spotify' services and creates and adds tracks to the playlist accordingly
 
 ## Install
 
