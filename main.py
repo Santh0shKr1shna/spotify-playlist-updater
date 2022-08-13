@@ -162,11 +162,45 @@ class SpotifyAPI(object):
                           })
         r = r.json()
         return r
+    
+    def get_playlist_items (self, pid, version='v1'):
+        endpoint = f"https://api.spotify.com/{version}/playlists/{pid}/tracks"
+        headers = self.get_resource_header()
+        r = requests.get(endpoint, headers=headers)
+        if r.status_code not in range(200, 299):
+            print(r)
+            return {}
+
+        data = r.json()
+        track_ids = []
+
+        for item in data['items']:
+            track_ids.append(item['track']['id'])
+
+        return track_ids
+
+    def clear_playlist (self, pid):
+        track_list = self.get_playlist_items(pid)
+        track_uris = ["spotify:track:"+track for track in track_list]
+        params = {"tracks": []}
+        for uri in track_uris:
+            params["tracks"].append({"uri": uri})
+
+        #print(params)
+
+        endpoint = f"https://api.spotify.com/v1/playlists/{pid}/tracks"
+        OAuth_token = os.getenv('OAuth_delete_playlist')
+        r = requests.delete(endpoint, headers={
+            'Content-Type': 'apllication/JSON',
+            'Authorization': f"Bearer {OAuth_token}"
+        }, data=params)
+
+        return r.json()
 
 client = SpotifyAPI(client_id,client_secret)
 print(client.perform_auth())
 
-"""
+
 res = client.search(query='Sweater Weather',search_type='track')
 
 for data in res["tracks"]["items"]:
@@ -183,14 +217,17 @@ for l in data_list:
     res = client.search(query=track_data, search_type='track')
     for data in res["tracks"]["items"]:
             l.append(data["id"])
-"""
+
 
 
 # Create the playlist and use this code once. Then save the playlist ID.
-#p_id = client.create_playlist()
+# p_id = '2F7LKru4ouJQdrqkJlSFiC'
 
-p_id = '2F7LKru4ouJQdrqkJlSFiC'
+p_id = client.create_playlist()
 
-#playlist_status = client.populate_playlist(p_id, data_list)
+
+playlist_status = client.populate_playlist(p_id, data_list)
 #print(playlist_status)
+
+print(client.clear_playlist(p_id, sample_tracks))
 
