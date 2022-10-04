@@ -162,7 +162,7 @@ class SpotifyAPI(object):
                           })
         r = r.json()
         return r
-    
+
     def get_playlist_items (self, pid, version='v1'):
         endpoint = f"https://api.spotify.com/{version}/playlists/{pid}/tracks"
         headers = self.get_resource_header()
@@ -179,17 +179,19 @@ class SpotifyAPI(object):
 
         return track_ids
 
+
     def clear_playlist (self, pid):
+
         track_list = self.get_playlist_items(pid)
         track_uris = ["spotify:track:"+track for track in track_list]
         params = {"tracks": []}
         for uri in track_uris:
             params["tracks"].append({"uri": uri})
-
-        #print(params)
+        params = json.dumps(params)
 
         endpoint = f"https://api.spotify.com/v1/playlists/{pid}/tracks"
         OAuth_token = os.getenv('OAuth_delete_playlist')
+
         r = requests.delete(endpoint, headers={
             'Content-Type': 'apllication/JSON',
             'Authorization': f"Bearer {OAuth_token}"
@@ -197,37 +199,43 @@ class SpotifyAPI(object):
 
         return r.json()
 
-client = SpotifyAPI(client_id,client_secret)
-print(client.perform_auth())
+if __name__ == "__main__":
 
-
-res = client.search(query='Sweater Weather',search_type='track')
-
-for data in res["tracks"]["items"]:
-    print(data["album"]["artists"][0]["name"], end=" ")
-    print(data["id"])
-
-scrape_list = Scrapper()
-data_list = scrape_list.scrapped_data()
-
-
-for l in data_list:
-    track_data = l[1]
-    artist_data = l[2]
-    res = client.search(query=track_data, search_type='track')
+    client = SpotifyAPI(client_id,client_secret)
+    print(client.perform_auth())
+    
+    """
+    
+    # Checking the search endpoints
+    res = client.search(query='Sweater Weather',search_type='track')
     for data in res["tracks"]["items"]:
-            l.append(data["id"])
-
-
-
-# Create the playlist and use this code once. Then save the playlist ID.
-# p_id = '2F7LKru4ouJQdrqkJlSFiC'
-
-p_id = client.create_playlist()
-
-
-playlist_status = client.populate_playlist(p_id, data_list)
-#print(playlist_status)
-
-print(client.clear_playlist(p_id, sample_tracks))
-
+        print(data["album"]["artists"][0]["name"], end=" ")
+        print(data["id"])
+    
+    # Get scrapped data
+    scrape_list = Scrapper()
+    data_list = scrape_list.scrapped_data()
+    
+    # Adding track uri to the end of each tracks
+    for l in data_list:
+        track_data = l[1]
+        artist_data = l[2]
+        res = client.search(query=track_data, search_type='track')
+        for data in res["tracks"]["items"]:
+                l.append(data["id"])
+    
+    # Create the playlist and use this code once. Then save the playlist ID.
+    # Do not use it more than once unless you need multiple playlists
+    ### p_id = client.create_playlist()
+    
+    p_id = '2F7LKru4ouJQdrqkJlSFiC'
+    
+    # Self explanatory
+    playlist_status = client.populate_playlist(p_id, data_list)
+    print(playlist_status)
+    
+    # To clear the playlist
+    delete_status = client.clear_playlist(p_id)
+    print(delete_status)
+    
+    """
